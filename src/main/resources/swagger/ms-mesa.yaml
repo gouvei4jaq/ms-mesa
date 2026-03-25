@@ -1,0 +1,153 @@
+swagger: "2.0"
+info: 
+  title: "ms-mesa"
+  description: "Microserviço responsável pela gestão de mesas"
+  version: "1.0.0"
+  contact: 
+    name: "Jaqueline Gouveia"
+    email: "jaquelinegouvei4@gmail.com"
+    url: "github.com.br/ms-mesa"
+
+basePath: "/gestao-mesa/v1"
+
+paths: 
+  /mesas:
+    post:
+      tags:
+        - "Mesas"
+      summary: "Cria uma mesa"
+      description: "Realiza a criação de uma nova mesa"
+      parameters: 
+        - in: "body"
+          name: "body"
+          required: true
+          schema: 
+            $ref: '#/definitions/CriarMesaRequest'
+      responses: 
+        201:
+            description: "Mesa criada com sucesso"
+            headers: 
+              Location:
+                type: "string"
+                description: "URL da mesa criada contendo o ID"
+              Mesa-id:
+                type: "string"
+                description: "Id único da mesa"
+    get:
+      tags: 
+        - "Mesas"
+      summary: "Lista de mesas com filtros"
+      description: "Retorna uma lista de mesas. Pode ser filtrado por status ou capacidade."
+      parameters:
+        - name: "statusMesa"
+          in: "query"
+          required: false
+          type: "string"
+          enum: ["Disponível","Ocupada", "Em fechamento","Fechada", "Reservada"]
+        - name: "capacidadeMesa"
+          in: "query"
+          required: false
+          type: "integer"
+      responses:
+        200:
+          description: "Lista de mesas retornada com sucesso"
+          schema:
+            type: "array"
+            items:
+              $ref: "#/definitions/MesaResponse"
+
+  /mesas/{mesaId}:
+    get:
+      tags:
+        - "Mesas"
+      summary: "Busca uma mesa por ID"
+      parameters:
+        - name: "mesaId"
+          in: "path"
+          required: true
+          type: "string"
+      responses:
+        200:
+          description: "Mesa encontrada"
+          schema:
+            $ref: "#/definitions/MesaResponse"
+        404:
+          description: "Mesa não encontrada"
+
+    patch:
+      tags:
+        - "Mesas"
+      summary: "Atualiza os dados de uma mesa"
+      description: "Permite alterar a capacidade e o status de uma mesa existente."
+      parameters:
+        - name: "mesaId"
+          in: "path"
+          required: true
+          type: "string"
+        - in: "body"
+          name: "body"
+          required: true
+          schema:
+            $ref: "#/definitions/AtualizarMesaRequest"
+      responses:
+        200:
+          description: "Mesa atualizada com sucesso"
+        404:
+          description: "Mesa não encontrada"
+
+    delete:
+      tags:
+        - "Mesas"
+      summary: "Remove uma mesa do sistema"
+      description: "Exclui o registro de uma mesa."
+      parameters:
+        - name: "mesaId"
+          in: "path"
+          required: true
+          type: "string"
+      responses:
+        204:
+          description: "Mesa deletada com sucesso"
+        404:
+          description: "Mesa não encontrada"
+
+definitions:
+    CriarMesaRequest:
+      type: "object"
+      properties: 
+        numeroMesa:
+          type: "integer"
+          example: 01
+        statusMesa:
+          type: "string"
+          enum: ["Disponível","Ocupada", "Em fechamento","Fechada", "Reservada"]
+        capacidadeMesa:
+          type: "integer"
+          example: 4
+
+    AtualizarMesaRequest:
+      type: "object"
+      properties: 
+        numeroMesa:
+          type: "integer"
+          example: 01
+        statusMesa:
+          type: "string"
+          enum: ["Disponível","Ocupada", "Em fechamento","Fechada", "Reservada"]
+        capacidadeMesa:
+          type: "integer"
+          example: 4
+    
+    MesaResponse:
+      type: "object"
+      properties:
+        id:
+          type: "string"
+          example: "UUID"
+        numeroMesa:
+          type: "integer"
+          example: 1
+        statusMesa:
+          type: "string"
+        capacidadeMesa:
+          type: "integer"
