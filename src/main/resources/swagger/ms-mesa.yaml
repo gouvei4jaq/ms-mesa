@@ -1,40 +1,40 @@
 swagger: "2.0"
-info: 
+info:
   title: "ms-mesa"
   description: "Microserviço responsável pela gestão de mesas"
   version: "1.0.0"
-  contact: 
+  contact:
     name: "Jaqueline Gouveia"
     email: "jaquelinegouvei4@gmail.com"
     url: "github.com.br/ms-mesa"
 
 basePath: "/gestao-mesa/v1"
 
-paths: 
+paths:
   /mesas:
     post:
       tags:
         - "Mesas"
       summary: "Cria uma mesa"
       description: "Realiza a criação de uma nova mesa"
-      parameters: 
+      parameters:
         - in: "body"
           name: "body"
           required: true
-          schema: 
+          schema:
             $ref: '#/definitions/CriarMesaRequest'
-      responses: 
+      responses:
         201:
-            description: "Mesa criada com sucesso"
-            headers: 
-              Location:
-                type: "string"
-                description: "URL da mesa criada contendo o ID"
-              Mesa-id:
-                type: "string"
-                description: "Id único da mesa"
+          description: "Mesa criada com sucesso"
+          headers:
+            Location:
+              type: "string"
+              description: "URL da mesa criada contendo o ID"
+            Mesa-id:
+              type: "string"
+              description: "Id único da mesa"
     get:
-      tags: 
+      tags:
         - "Mesas"
       summary: "Lista de mesas com filtros"
       description: "Retorna uma lista de mesas. Pode ser filtrado por status ou capacidade."
@@ -43,7 +43,7 @@ paths:
           in: "query"
           required: false
           type: "string"
-          enum: ["Disponível","Ocupada", "Em fechamento","Fechada", "Reservada"]
+          enum: ["DISPONIVEL","OCUPADA", "EM_FECHAMENTO","FECHADA", "RESERVADA"]
         - name: "capacidadeMesa"
           in: "query"
           required: false
@@ -90,7 +90,7 @@ paths:
           schema:
             $ref: "#/definitions/AtualizarMesaRequest"
       responses:
-        200:
+        204:
           description: "Mesa atualizada com sucesso"
         404:
           description: "Mesa não encontrada"
@@ -112,42 +112,42 @@ paths:
           description: "Mesa não encontrada"
 
 definitions:
-    CriarMesaRequest:
-      type: "object"
-      properties: 
-        numeroMesa:
-          type: "integer"
-          example: 01
-        statusMesa:
-          type: "string"
-          enum: ["Disponível","Ocupada", "Em fechamento","Fechada", "Reservada"]
-        capacidadeMesa:
-          type: "integer"
-          example: 4
+  CriarMesaRequest:
+    type: "object"
+    properties:
+      numeroMesa:
+        type: "integer"
+        example: 01
+      statusMesa:
+        type: "string"
+        enum: ["DISPONIVEL","OCUPADA", "EM_FECHAMENTO","FECHADA", "RESERVADA"]
+      capacidadeMesa:
+        type: "integer"
+        example: 4
 
-    AtualizarMesaRequest:
-      type: "object"
-      properties: 
-        numeroMesa:
-          type: "integer"
-          example: 01
-        statusMesa:
-          type: "string"
-          enum: ["Disponível","Ocupada", "Em fechamento","Fechada", "Reservada"]
-        capacidadeMesa:
-          type: "integer"
-          example: 4
-    
-    MesaResponse:
-      type: "object"
-      properties:
-        id:
-          type: "string"
-          example: "UUID"
-        numeroMesa:
-          type: "integer"
-          example: 1
-        statusMesa:
-          type: "string"
-        capacidadeMesa:
-          type: "integer"
+  AtualizarMesaRequest:
+    type: "object"
+    properties:
+      numeroMesa:
+        type: "integer"
+        example: 01
+      statusMesa:
+        type: "string"
+        enum: ["DISPONIVEL","OCUPADA", "EM_FECHAMENTO","FECHADA", "RESERVADA"]
+      capacidadeMesa:
+        type: "integer"
+        example: 4
+
+  MesaResponse:
+    type: "object"
+    properties:
+      id:
+        type: "string"
+        example: "UUID"
+      numeroMesa:
+        type: "integer"
+        example: 1
+      statusMesa:
+        type: "string"
+      capacidadeMesa:
+        type: "integer"
