@@ -6,6 +6,7 @@ import com.restaurante.ms_mesa.exceptions.CapacidadeInvalidaException;
 import com.restaurante.ms_mesa.exceptions.MesaJaExistenteException;
 import com.restaurante.ms_mesa.repository.MesaRepository;
 import com.restaurante.ms_mesa.request.PostMesaRequest;
+import com.restaurante.ms_mesa.response.MesaResponse;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -16,6 +17,7 @@ import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -30,9 +32,13 @@ public class MesaServiceTest {
 
     private PostMesaRequest postMesaRequest;
 
+    private MesaResponse mesaResponse;
+
     private UUID id;
 
     private UUID idRepositorio;
+
+    private List<MesaEntity> mesas;
 
     @Test
     void deveRetornarOIdAoCadastrarMesaComSucesso(){
@@ -54,6 +60,44 @@ public class MesaServiceTest {
     void deveLancarErroQuandoCapacidadeForMenorOuIgualAZero(){
         dadoUmaRequestInvalida();
         entaoEsperoReceberUmErroDeCapacidadeInvalida();
+    }
+
+    @Test
+    void deveGarantirQueORepositorioSalvouAMesa(){
+        dadoUmaRequestValida();
+        dadoQueORepositorioNaoRetorneUmaMesa();
+        dadoQueORepositorioSalveUmaMesaComSucesso();
+        quandoEuChamarOMetodoCriarMesa();
+        entaoORepositorioDeveTerSidoChamadoParaSalvar();
+    }
+    
+    @Test
+    void deveRetornarTodasAsMesasQuandoNaoHouverFiltro(){
+        dadoQueExistemMesasNoRepositorio();
+        quandoEuChamarOMetodoBuscarMesas();
+        entaoEsperoReceberUmaListaDeMesas();
+    }
+
+    private void dadoQueExistemMesasNoRepositorio() {
+
+        mesas = List.of(
+                MesaEntity.builder()
+                        .id(UUID.randomUUID())
+                        .numero(2)
+                        .capacidade(4)
+                        .status(StatusMesa.OCUPADA)
+                        .dataDeAtualizacao(LocalDateTime.now())
+                        .build(),
+                MesaEntity.builder()
+                        .id(UUID.randomUUID())
+                        .numero(13)
+                        .capacidade(2)
+                        .status(StatusMesa.DISPONIVEL)
+                        .dataDeAtualizacao(LocalDateTime.now())
+                        .build()
+        );
+
+        Mockito.doReturn(mesas).when(mesaRepository).findAll();
     }
 
     void dadoUmaRequestValida(){
@@ -103,6 +147,10 @@ public class MesaServiceTest {
         id = mesaService.criarMesa(postMesaRequest);
     }
 
+    private void quandoEuChamarOMetodoBuscarMesas() {
+        mesaResponse = (MesaResponse) mesaService.buscarMesas();
+    }
+
     void entaoEsperoReceberOIdDaMesaCriada(){
         Assertions.assertEquals(idRepositorio.toString(), id.toString());
 
@@ -115,5 +163,14 @@ public class MesaServiceTest {
     void entaoEsperoReceberUmErroDeCapacidadeInvalida(){
         Assertions.assertThrows(CapacidadeInvalidaException.class, () -> quandoEuChamarOMetodoCriarMesa());
     }
+
+    private void entaoORepositorioDeveTerSidoChamadoParaSalvar() {
+        Mockito.verify(mesaRepository, Mockito.times(1)).save(ArgumentMatchers.any(MesaEntity.class));
+    }
+
+    private void entaoEsperoReceberUmaListaDeMesas() {
+        Assertions.assertEquals(2,mesaResponse);
+    }
+
 
 }

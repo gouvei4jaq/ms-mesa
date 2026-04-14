@@ -5,8 +5,10 @@ import com.restaurante.ms_mesa.exceptions.CapacidadeInvalidaException;
 import com.restaurante.ms_mesa.exceptions.MesaJaExistenteException;
 import com.restaurante.ms_mesa.repository.MesaRepository;
 import com.restaurante.ms_mesa.request.PostMesaRequest;
+import com.restaurante.ms_mesa.response.MesaResponse;
 
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -36,5 +38,11 @@ public class MesaService {
         MesaEntity mesaSalva = mesaRepository.save(mesaEntity);
 
         return mesaSalva.getId();
+    }
+
+    public List<MesaResponse> buscarMesas(){
+        List<MesaEntity> mesas = mesaRepository.findAll();
+
+        return null;
     }
 }
