@@ -33,18 +33,20 @@ paths:
             Mesa-id:
               type: "string"
               description: "Id único da mesa"
+        400:
+          description: "Requisição Inválida. Campos obrigatórios ausentes ou incorretos."
     get:
       tags:
         - "Mesas"
       summary: "Lista de mesas com filtros"
       description: "Retorna uma lista de mesas. Pode ser filtrado por status ou capacidade."
       parameters:
-        - name: "statusMesa"
+        - name: "status"
           in: "query"
           required: false
           type: "string"
           enum: ["DISPONIVEL","OCUPADA", "EM_FECHAMENTO","FECHADA", "RESERVADA"]
-        - name: "capacidadeMesa"
+        - name: "capacidade"
           in: "query"
           required: false
           type: "integer"
@@ -114,27 +116,31 @@ paths:
 definitions:
   CriarMesaRequest:
     type: "object"
+    required:
+      - numero
+      - status
+      - capacidade
     properties:
-      numeroMesa:
+      numero:
         type: "integer"
         example: 01
-      statusMesa:
+      status:
         type: "string"
         enum: ["DISPONIVEL","OCUPADA", "EM_FECHAMENTO","FECHADA", "RESERVADA"]
-      capacidadeMesa:
+      capacidade:
         type: "integer"
         example: 4
 
   AtualizarMesaRequest:
     type: "object"
     properties:
-      numeroMesa:
+      numero:
         type: "integer"
         example: 01
-      statusMesa:
+      status:
         type: "string"
         enum: ["DISPONIVEL","OCUPADA", "EM_FECHAMENTO","FECHADA", "RESERVADA"]
-      capacidadeMesa:
+      capacidade:
         type: "integer"
         example: 4
 
@@ -144,10 +150,10 @@ definitions:
       id:
         type: "string"
         example: "UUID"
-      numeroMesa:
+      numero:
         type: "integer"
         example: 1
-      statusMesa:
+      status:
         type: "string"
-      capacidadeMesa:
+      capacidade:
         type: "integer"
