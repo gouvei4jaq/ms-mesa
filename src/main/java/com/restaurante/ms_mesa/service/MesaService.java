@@ -41,8 +41,17 @@ public class MesaService {
     }
 
     public List<MesaResponse> buscarMesas(){
+
         List<MesaEntity> mesas = mesaRepository.findAll();
 
-        return null;
+        return mesas.stream()
+                .map(mesa -> MesaResponse.builder()
+                        .id(mesa.getId())
+                        .numero(mesa.getNumero())
+                        .capacidade(mesa.getCapacidade())
+                        .status(mesa.getStatus())
+                        .build())
+                .toList();
     }
 }
+     

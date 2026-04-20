@@ -32,7 +32,7 @@ public class MesaServiceTest {
 
     private PostMesaRequest postMesaRequest;
 
-    private MesaResponse mesaResponse;
+    private List<MesaResponse> resposta;
 
     private UUID id;
 
@@ -148,7 +148,7 @@ public class MesaServiceTest {
     }
 
     private void quandoEuChamarOMetodoBuscarMesas() {
-        mesaResponse = (MesaResponse) mesaService.buscarMesas();
+        resposta = mesaService.buscarMesas();
     }
 
     void entaoEsperoReceberOIdDaMesaCriada(){
@@ -169,8 +169,7 @@ public class MesaServiceTest {
     }
 
     private void entaoEsperoReceberUmaListaDeMesas() {
-        Assertions.assertEquals(2,mesaResponse);
+        Assertions.assertEquals(2, resposta.size());
     }
-
 
 }
