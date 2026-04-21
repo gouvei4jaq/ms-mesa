@@ -70,13 +70,14 @@ public class MesaServiceTest {
         quandoEuChamarOMetodoCriarMesa();
         entaoORepositorioDeveTerSidoChamadoParaSalvar();
     }
-    
+
     @Test
-    void deveRetornarTodasAsMesasQuandoNaoHouverFiltro(){
+    void deveRetornarMesasFiltradasPorStatus(){
         dadoQueExistemMesasNoRepositorio();
-        quandoEuChamarOMetodoBuscarMesas();
-        entaoEsperoReceberUmaListaDeMesas();
+        quandoEuChamarOMetodoBuscarMesasComFiltroDeStatus();
+        entaoEsperoReceberApenasMesasComOStatusEspecificado();
     }
+
 
     private void dadoQueExistemMesasNoRepositorio() {
 
@@ -147,8 +148,9 @@ public class MesaServiceTest {
         id = mesaService.criarMesa(postMesaRequest);
     }
 
-    private void quandoEuChamarOMetodoBuscarMesas() {
-        resposta = mesaService.buscarMesas();
+
+    private void quandoEuChamarOMetodoBuscarMesasComFiltroDeStatus(){
+        resposta = mesaService.buscarMesas(StatusMesa.DISPONIVEL);
     }
 
     void entaoEsperoReceberOIdDaMesaCriada(){
@@ -172,4 +174,7 @@ public class MesaServiceTest {
         Assertions.assertEquals(2, resposta.size());
     }
 
+    private void entaoEsperoReceberApenasMesasComOStatusEspecificado(){
+        Assertions.assertTrue(resposta.stream().allMatch(mesa -> mesa.getStatus() == StatusMesa.DISPONIVEL));
+    }
 }

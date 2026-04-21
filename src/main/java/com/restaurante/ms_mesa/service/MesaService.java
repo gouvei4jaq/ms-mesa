@@ -1,6 +1,7 @@
 package com.restaurante.ms_mesa.service;
 
 import com.restaurante.ms_mesa.entity.MesaEntity;
+import com.restaurante.ms_mesa.enumeration.StatusMesa;
 import com.restaurante.ms_mesa.exceptions.CapacidadeInvalidaException;
 import com.restaurante.ms_mesa.exceptions.MesaJaExistenteException;
 import com.restaurante.ms_mesa.repository.MesaRepository;
@@ -40,11 +41,12 @@ public class MesaService {
         return mesaSalva.getId();
     }
 
-    public List<MesaResponse> buscarMesas(){
+    public List<MesaResponse> buscarMesas(StatusMesa status){
 
         List<MesaEntity> mesas = mesaRepository.findAll();
 
         return mesas.stream()
+                .filter(mesa -> mesa.getStatus() == status)
                 .map(mesa -> MesaResponse.builder()
                         .id(mesa.getId())
                         .numero(mesa.getNumero())
