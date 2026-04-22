@@ -4,6 +4,7 @@ import com.restaurante.ms_mesa.entity.MesaEntity;
 import com.restaurante.ms_mesa.enumeration.StatusMesa;
 import com.restaurante.ms_mesa.exceptions.CapacidadeInvalidaException;
 import com.restaurante.ms_mesa.exceptions.MesaJaExistenteException;
+import com.restaurante.ms_mesa.exceptions.MesaNaoEncontradaException;
 import com.restaurante.ms_mesa.repository.MesaRepository;
 import com.restaurante.ms_mesa.request.PostMesaRequest;
 import com.restaurante.ms_mesa.response.MesaResponse;
@@ -33,6 +34,8 @@ public class MesaServiceTest {
     private PostMesaRequest postMesaRequest;
 
     private List<MesaResponse> resposta;
+
+    private MesaResponse respostaId;
 
     private UUID id;
 
@@ -72,10 +75,44 @@ public class MesaServiceTest {
     }
 
     @Test
-    void deveRetornarMesasFiltradasPorStatus(){
+    void deveRetornarTodasAsMesasQuandoNaoHouverFiltro(){
         dadoQueExistemMesasNoRepositorio();
+        quandoEuChamarOMetodoBuscarMesasSemPassarNenhumFiltro();
+        entaoEsperoReceberUmaListaDeMesasSemFiltro();
+    }
+
+    @Test
+    void deveRetornarMesasFiltradasPorStatus(){
+        dadoQueExistemMesasComStatusDisponivel();
         quandoEuChamarOMetodoBuscarMesasComFiltroDeStatus();
         entaoEsperoReceberApenasMesasComOStatusEspecificado();
+    }
+
+    @Test
+    void deveRetornarMesasFiltradasPorCapacidade(){
+        dadoQueExistemMesasComCapacidadeTres();
+        quandoEuChamarOMetodoBuscarMesasComFiltroDeCapacidade();
+        entaoEsperoReceberApenasMesasComACapacidadeEspecificada();
+    }
+
+    @Test
+    void deveRetornarMesasFiltradasPorCapacidadeEStatus(){
+        dadoQueExistemMesasComStatusDisponivelECapacidadeDois();
+        quandoEuChamarOMetodoBuscarMesasComFiltroDeCapacidadeEStatus();
+        entaoEsperoReceberApenasMesasComACapacidadeEStatusEspecificados();
+    }
+
+    @Test
+    void deveRetornarMesaAoBuscarPorIdExistente() {
+        dadoQueExisteUmaMesaNoRepositorioComId();
+        quandoEuChamarOMetodoBuscarPorId();
+        entaoEsperoReceberAMesaComIdCorreto();
+    }
+
+    @Test
+    void deveLancarErroAoBuscarMesaComIdInexistente() {
+        dadoQueORepositorioNaoEncontreUmaMesaPeloId();
+        entaoEsperoUmErroDeMesaNaoEncontradaException();
     }
 
 
@@ -85,7 +122,7 @@ public class MesaServiceTest {
                 MesaEntity.builder()
                         .id(UUID.randomUUID())
                         .numero(2)
-                        .capacidade(4)
+                        .capacidade(6)
                         .status(StatusMesa.OCUPADA)
                         .dataDeAtualizacao(LocalDateTime.now())
                         .build(),
@@ -101,15 +138,93 @@ public class MesaServiceTest {
         Mockito.doReturn(mesas).when(mesaRepository).findAll();
     }
 
-    void dadoUmaRequestValida(){
+    private void dadoQueExistemMesasComStatusDisponivel() {
+
+        mesas = List.of(
+                MesaEntity.builder()
+                        .id(UUID.randomUUID())
+                        .numero(1)
+                        .capacidade(4)
+                        .status(StatusMesa.DISPONIVEL)
+                        .dataDeAtualizacao(LocalDateTime.now())
+                        .build(),
+
+                MesaEntity.builder()
+                        .id(UUID.randomUUID())
+                        .numero(2)
+                        .capacidade(2)
+                        .status(StatusMesa.DISPONIVEL)
+                        .dataDeAtualizacao(LocalDateTime.now())
+                        .build()
+        );
+
+        Mockito.doReturn(mesas).when(mesaRepository).findByStatus(StatusMesa.DISPONIVEL);
+    }
+
+    private void dadoQueExistemMesasComStatusDisponivelECapacidadeDois() {
+
+        mesas = List.of(
+                MesaEntity.builder()
+                        .id(UUID.randomUUID())
+                        .numero(10)
+                        .capacidade(2)
+                        .status(StatusMesa.DISPONIVEL)
+                        .dataDeAtualizacao(LocalDateTime.now())
+                        .build()
+        );
+
+        Mockito.doReturn(mesas).when(mesaRepository).findByStatusAndCapacidade(StatusMesa.DISPONIVEL, 2);
+
+    }
+    private void dadoQueExistemMesasComCapacidadeTres() {
+
+        mesas = List.of(
+                MesaEntity.builder()
+                        .id(UUID.randomUUID())
+                        .numero(3)
+                        .capacidade(3)
+                        .status(StatusMesa.DISPONIVEL)
+                        .dataDeAtualizacao(LocalDateTime.now())
+                        .build(),
+
+                MesaEntity.builder()
+                        .id(UUID.randomUUID())
+                        .numero(4)
+                        .capacidade(3)
+                        .status(StatusMesa.OCUPADA)
+                        .dataDeAtualizacao(LocalDateTime.now())
+                        .build()
+        );
+
+        Mockito.doReturn(mesas).when(mesaRepository).findByCapacidade(3);
+
+    }
+
+    private void dadoQueExisteUmaMesaNoRepositorioComId() {
+
+        id = UUID.randomUUID();
+
+        MesaEntity mesa = MesaEntity.builder()
+                .id(id)
+                .numero(5)
+                .capacidade(4)
+                .status(StatusMesa.DISPONIVEL)
+                .dataDeAtualizacao(LocalDateTime.now())
+                .build();
+
+        Mockito.doReturn(Optional.of(mesa)).when(mesaRepository).findById(id);
+
+    }
+
+    private void dadoUmaRequestValida(){
         postMesaRequest = new PostMesaRequest(1, StatusMesa.DISPONIVEL, 4);
     }
 
-    void dadoUmaRequestInvalida(){
+    private void dadoUmaRequestInvalida(){
         postMesaRequest = new PostMesaRequest(3, StatusMesa.DISPONIVEL, 0);
     }
 
-    void dadoQueORepositorioRetorneUmaMesaComOMesmoNumero(){
+    private void dadoQueORepositorioRetorneUmaMesaComOMesmoNumero(){
 
         MesaEntity mesaEntity = MesaEntity.builder()
                 .id(UUID.randomUUID())
@@ -124,11 +239,11 @@ public class MesaServiceTest {
                 .findByNumero(ArgumentMatchers.anyInt());
     }
 
-    void dadoQueORepositorioNaoRetorneUmaMesa(){
+    private void dadoQueORepositorioNaoRetorneUmaMesa(){
         Mockito.doReturn(Optional.empty()).when(mesaRepository).findByNumero(ArgumentMatchers.anyInt());
     }
 
-    void dadoQueORepositorioSalveUmaMesaComSucesso(){
+    private void dadoQueORepositorioSalveUmaMesaComSucesso(){
 
         idRepositorio = UUID.randomUUID();
 
@@ -144,25 +259,45 @@ public class MesaServiceTest {
 
     }
 
-    void quandoEuChamarOMetodoCriarMesa(){
+    private void dadoQueORepositorioNaoEncontreUmaMesaPeloId(){
+        Mockito.doReturn(Optional.empty()).when(mesaRepository).findById(ArgumentMatchers.any());
+
+    }
+
+    private void quandoEuChamarOMetodoCriarMesa(){
         id = mesaService.criarMesa(postMesaRequest);
     }
 
-
-    private void quandoEuChamarOMetodoBuscarMesasComFiltroDeStatus(){
-        resposta = mesaService.buscarMesas(StatusMesa.DISPONIVEL);
+    private void quandoEuChamarOMetodoBuscarMesasSemPassarNenhumFiltro(){
+        resposta = mesaService.buscarMesas(null, null);
     }
 
-    void entaoEsperoReceberOIdDaMesaCriada(){
+    private void quandoEuChamarOMetodoBuscarMesasComFiltroDeStatus(){
+        resposta = mesaService.buscarMesas(StatusMesa.DISPONIVEL, null);
+    }
+
+    private void quandoEuChamarOMetodoBuscarMesasComFiltroDeCapacidade(){
+        resposta = mesaService.buscarMesas(null, 3);
+    }
+
+    private void quandoEuChamarOMetodoBuscarMesasComFiltroDeCapacidadeEStatus(){
+        resposta = mesaService.buscarMesas(StatusMesa.DISPONIVEL, 2);
+    }
+
+    private void quandoEuChamarOMetodoBuscarPorId(){
+        respostaId = mesaService.buscarMesaPorId(id);
+    }
+
+    private void entaoEsperoReceberOIdDaMesaCriada(){
         Assertions.assertEquals(idRepositorio.toString(), id.toString());
 
     }
 
-    void entaoEsperoReceberUmErroDeNumeroExistente(){
+    private void entaoEsperoReceberUmErroDeNumeroExistente(){
         Assertions.assertThrows(MesaJaExistenteException.class, () -> quandoEuChamarOMetodoCriarMesa() );
     }
 
-    void entaoEsperoReceberUmErroDeCapacidadeInvalida(){
+    private void entaoEsperoReceberUmErroDeCapacidadeInvalida(){
         Assertions.assertThrows(CapacidadeInvalidaException.class, () -> quandoEuChamarOMetodoCriarMesa());
     }
 
@@ -170,11 +305,28 @@ public class MesaServiceTest {
         Mockito.verify(mesaRepository, Mockito.times(1)).save(ArgumentMatchers.any(MesaEntity.class));
     }
 
-    private void entaoEsperoReceberUmaListaDeMesas() {
+    private void entaoEsperoReceberApenasMesasComOStatusEspecificado(){
+        Assertions.assertTrue(resposta.stream().allMatch(mesa -> mesa.getStatus() == StatusMesa.DISPONIVEL));
+    }
+
+    private void entaoEsperoReceberApenasMesasComACapacidadeEspecificada(){
+        Assertions.assertTrue(resposta.stream().allMatch(mesa -> mesa.getCapacidade() == 3));
+    }
+
+    private void entaoEsperoReceberUmaListaDeMesasSemFiltro(){
         Assertions.assertEquals(2, resposta.size());
     }
 
-    private void entaoEsperoReceberApenasMesasComOStatusEspecificado(){
-        Assertions.assertTrue(resposta.stream().allMatch(mesa -> mesa.getStatus() == StatusMesa.DISPONIVEL));
+    private void entaoEsperoReceberApenasMesasComACapacidadeEStatusEspecificados(){
+        Assertions.assertTrue(resposta.stream().anyMatch(mesa -> mesa.getCapacidade() == 2 && mesa.getStatus() == StatusMesa.DISPONIVEL));
+    }
+
+    private void entaoEsperoReceberAMesaComIdCorreto(){
+        Assertions.assertEquals(id, respostaId.getId());
+    }
+
+    private void entaoEsperoUmErroDeMesaNaoEncontradaException(){
+        Assertions.assertThrows(MesaNaoEncontradaException.class,
+                () -> mesaService.buscarMesaPorId(UUID.randomUUID()));
     }
 }

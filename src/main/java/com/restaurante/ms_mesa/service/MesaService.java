@@ -4,6 +4,7 @@ import com.restaurante.ms_mesa.entity.MesaEntity;
 import com.restaurante.ms_mesa.enumeration.StatusMesa;
 import com.restaurante.ms_mesa.exceptions.CapacidadeInvalidaException;
 import com.restaurante.ms_mesa.exceptions.MesaJaExistenteException;
+import com.restaurante.ms_mesa.exceptions.MesaNaoEncontradaException;
 import com.restaurante.ms_mesa.repository.MesaRepository;
 import com.restaurante.ms_mesa.request.PostMesaRequest;
 import com.restaurante.ms_mesa.response.MesaResponse;
@@ -26,7 +27,7 @@ public class MesaService {
         Optional<MesaEntity> validaMesa =  mesaRepository.findByNumero(postMesaRequest.getNumero());
 
         if (validaMesa.isPresent()){
-           throw new MesaJaExistenteException();
+           throw new MesaJaExistenteException(postMesaRequest.getNumero());
         }
 
         MesaEntity mesaEntity = MesaEntity.builder()
@@ -41,12 +42,21 @@ public class MesaService {
         return mesaSalva.getId();
     }
 
-    public List<MesaResponse> buscarMesas(StatusMesa status){
+    public List<MesaResponse> buscarMesas(StatusMesa status, Integer capacidade){
 
-        List<MesaEntity> mesas = mesaRepository.findAll();
+        List<MesaEntity> mesas;
+
+        if (status != null && capacidade != null){
+            mesas = mesaRepository.findByStatusAndCapacidade(status, capacidade);
+        } else if (status != null){
+            mesas = mesaRepository.findByStatus(status);
+        }else if (capacidade != null){
+            mesas = mesaRepository.findByCapacidade(capacidade);
+        }else {
+            mesas = mesaRepository.findAll();
+        }
 
         return mesas.stream()
-                .filter(mesa -> mesa.getStatus() == status)
                 .map(mesa -> MesaResponse.builder()
                         .id(mesa.getId())
                         .numero(mesa.getNumero())
@@ -54,6 +64,21 @@ public class MesaService {
                         .status(mesa.getStatus())
                         .build())
                 .toList();
+    }
+
+    public MesaResponse buscarMesaPorId(UUID id){
+
+        MesaEntity mesa = mesaRepository.findById(id)
+                .orElseThrow(() -> new MesaNaoEncontradaException(id));
+
+
+        return MesaResponse.builder()
+                .id(mesa.getId())
+                .numero(mesa.getNumero())
+                .status(mesa.getStatus())
+                .capacidade(mesa.getCapacidade())
+                .build();
+
     }
 }
      
