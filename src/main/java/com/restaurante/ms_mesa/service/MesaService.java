@@ -6,6 +6,7 @@ import com.restaurante.ms_mesa.exceptions.CapacidadeInvalidaException;
 import com.restaurante.ms_mesa.exceptions.MesaJaExistenteException;
 import com.restaurante.ms_mesa.exceptions.MesaNaoEncontradaException;
 import com.restaurante.ms_mesa.repository.MesaRepository;
+import com.restaurante.ms_mesa.request.PatchMesaRequest;
 import com.restaurante.ms_mesa.request.PostMesaRequest;
 import com.restaurante.ms_mesa.response.MesaResponse;
 
@@ -44,19 +45,8 @@ public class MesaService {
 
     public List<MesaResponse> buscarMesas(StatusMesa status, Integer capacidade){
 
-        List<MesaEntity> mesas;
-
-        if (status != null && capacidade != null){
-            mesas = mesaRepository.findByStatusAndCapacidade(status, capacidade);
-        } else if (status != null){
-            mesas = mesaRepository.findByStatus(status);
-        }else if (capacidade != null){
-            mesas = mesaRepository.findByCapacidade(capacidade);
-        }else {
-            mesas = mesaRepository.findAll();
-        }
-
-        return mesas.stream()
+        return mesaRepository.findByFilters(status, capacidade)
+                .stream()
                 .map(mesa -> MesaResponse.builder()
                         .id(mesa.getId())
                         .numero(mesa.getNumero())
@@ -71,13 +61,26 @@ public class MesaService {
         MesaEntity mesa = mesaRepository.findById(id)
                 .orElseThrow(() -> new MesaNaoEncontradaException(id));
 
-
         return MesaResponse.builder()
                 .id(mesa.getId())
                 .numero(mesa.getNumero())
                 .status(mesa.getStatus())
                 .capacidade(mesa.getCapacidade())
                 .build();
+
+    }
+
+    public void atualizarMesa(UUID id, PatchMesaRequest patchMesaRequest){
+
+        MesaEntity mesa = mesaRepository.findById(id)
+                .orElseThrow(() -> new MesaNaoEncontradaException(id));
+
+        mesa.setNumero(patchMesaRequest.getNumero());
+        mesa.setStatus(patchMesaRequest.getStatus());
+        mesa.setCapacidade(patchMesaRequest.getCapacidade());
+        mesa.setDataDeAtualizacao(LocalDateTime.now());
+
+        mesaRepository.save(mesa);
 
     }
 }
