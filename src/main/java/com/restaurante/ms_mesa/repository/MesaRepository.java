@@ -20,8 +20,6 @@ public interface MesaRepository extends JpaRepository<MesaEntity, UUID> {
     WHERE (:status IS NULL OR m.status = :status)
     AND (:capacidade IS NULL OR m.capacidade = :capacidade)
     """)
-    List<MesaEntity> findByFilters(@Param("status") StatusMesa status,
-                                   @Param("capacidade") Integer capacidade);
-
+    List<MesaEntity> findByFilters(StatusMesa status, Integer capacidade);
 
 }
