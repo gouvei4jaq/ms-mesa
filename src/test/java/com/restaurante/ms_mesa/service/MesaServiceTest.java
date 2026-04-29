@@ -132,8 +132,20 @@ public class MesaServiceTest {
     @Test
     void deveLancarErroAoTentarAtualizarMesaComIdInexistente(){
         dadoQueORepositorioNaoEncontreUmaMesaPeloId();
-        dadoUmaRequestDeAtualizacaoValida();
-        entaoEsperoUmErroDeMesaNaoEncontradaException();
+        entaoEsperoUmErroDeMesaNaoEncontradaExceptionAoChamarOMetodoAtualizarMesa();
+    }
+
+    @Test
+    void deveDeletarUmaMesaComSucesso(){
+        dadoQueExisteUmaMesaNoRepositorioComId();
+        quandoEuChamarOMetodoDeletarMesa();
+        entaoORepositorioDeveterSidoChamadoParaDeletar();
+    }
+
+    @Test
+    void deveLancarErroAoTentarDeletarMesaCoIdInexistente(){
+        dadoQueORepositorioNaoEncontreUmaMesaPeloId();
+        entaoEsperoUmErroDeMesaNaoEncontradaExceptionAoChamarOMetodoDeletarMesa();
     }
 
     private void dadoQueExistemMesasNoRepositorio() {
@@ -316,6 +328,10 @@ public class MesaServiceTest {
         mesaService.atualizarMesa(id, patchMesaRequest);
     }
 
+    private void quandoEuChamarOMetodoDeletarMesa(){
+        mesaService.deletarMesa(id);
+    }
+
     private void entaoEsperoReceberOIdDaMesaCriada(){
         Assertions.assertEquals(idRepositorio.toString(), id.toString());
 
@@ -358,7 +374,22 @@ public class MesaServiceTest {
                 () -> mesaService.buscarMesaPorId(UUID.randomUUID()));
     }
 
+    private void entaoEsperoUmErroDeMesaNaoEncontradaExceptionAoChamarOMetodoAtualizarMesa(){
+        Assertions.assertThrows(MesaNaoEncontradaException.class,
+                () -> mesaService.atualizarMesa(id, patchMesaRequest));
+    }
+
+    private void entaoEsperoUmErroDeMesaNaoEncontradaExceptionAoChamarOMetodoDeletarMesa(){
+        Assertions.assertThrows(MesaNaoEncontradaException.class,
+                () -> mesaService.deletarMesa(UUID.randomUUID()));
+    }
+
     private void entaoORepositorioDeveTerSidoChamadoParaSalvarAtualizacao(){
         Mockito.verify(mesaRepository, Mockito.times(1)).save(ArgumentMatchers.any(MesaEntity.class));
+    }
+
+    private void entaoORepositorioDeveterSidoChamadoParaDeletar(){
+        Mockito.verify(mesaRepository, Mockito.times(1)).delete(ArgumentMatchers.any(MesaEntity.class));
+
     }
 }

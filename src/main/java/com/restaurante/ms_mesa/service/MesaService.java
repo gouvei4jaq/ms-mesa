@@ -83,5 +83,13 @@ public class MesaService {
         mesaRepository.save(mesa);
 
     }
+
+    public void deletarMesa(UUID id) {
+
+        MesaEntity mesa = mesaRepository.findById(id)
+                .orElseThrow(() -> new MesaNaoEncontradaException(id));
+
+        mesaRepository.delete(mesa);
+    }
 }
      
